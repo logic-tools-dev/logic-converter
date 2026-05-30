@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Step-by-Step Logic Converter</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0b1329; color: #f8fafc; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        .container { max-width: 850px; width: 100%; background: linear-gradient(145deg, #1c2541, #131a35); padding: 35px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid #3a506b; }
+        h2 { text-align: center; color: #64dfdf; margin-top: 0; font-size: 28px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 0 10px rgba(100,223,223,0.3); }
+        
+        .input-group { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 25px; }
+        label { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 14px; background: #0b1329; border: 2px solid #3a506b; border-radius: 8px; color: #fff; font-size: 16px; transition: all 0.3s ease; }
+        input:focus, select:focus { outline: none; border-color: #64dfdf; box-shadow: 0 0 8px rgba(100,223,223,0.2); }
+        
+        .grid-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 25px; }
+        .card { background: #1c2541; padding: 18px; border-radius: 10px; position: relative; border-left: 4px solid #3a506b; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card.accent-bin { border-left-color: #4ea8de; }
+        .card.accent-hex { border-left-color: #7209b7; }
+        .card.accent-oct { border-left-color: #f72585; }
+        .card.accent-twos { border-left-color: #ffb703; }
+        .card.full-width { grid-column: span 2; }
+        
+        .card-title { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .card-value { font-size: 20px; font-weight: bold; margin-top: 8px; word-break: break-all; font-family: 'Courier New', Courier, monospace; color: #e2e8f0; }
+        
+        /* IEEE Visual Component */
+        .ieee-container { display: flex; gap: 6px; margin-top: 12px; font-family: 'Courier New', monospace; font-size: 16px; font-weight: bold; }
+        .ieee-bit { padding: 10px; border-radius: 6px; text-align: center; color: #fff; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .ieee-sign { background: #ef4444; width: 45px; }
+        .ieee-exp { background: #f59e0b; flex-grow: 1; }
+        .ieee-mant { background: #10b981; flex-grow: 3; }
+        .ieee-labels { display: flex; gap: 20px; font-size: 11px; margin-top: 6px; color: #94a3b8; font-weight: 500; }
+
+        .copy-btn { position: absolute; right: 12px; top: 15px; background: #3a506b; border: none; color: #cbd5e1; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .copy-btn:hover { background: #64dfdf; color: #0b1329; font-weight: bold; }
+        
+        /* Steps Styling Layout */
+        .steps-box { margin-top: 30px; background: #0b1329; padding: 25px; border-radius: 12px; border: 1px dashed #3a506b; display: none; }
+        .steps-box h3 { margin-top: 0; color: #64dfdf; font-size: 18px; border-bottom: 2px solid #1c2541; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .step-section { margin-top: 20px; background: #131a35; padding: 15px; border-radius: 8px; border-left: 3px solid #64dfdf; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .step-title { color: #ffb703; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
+        .step-body { font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #cbd5e1; line-height: 1.6; white-space: pre-line; }
+        
+        /* Table Style inside Steps */
+        .step-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-family: 'Courier New', monospace; font-size: 14px; }
+        .step-table th { background: #1c2541; color: #64dfdf; padding: 8px; text-align: left; font-size: 12px; }
+        .step-table td { padding: 8px; border-bottom: 1px solid #3a506b; color: #e2e8f0; }
+        .highlight-text { color: #64dfdf; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Ultimate Logic & Base Converter</h2>
+    
+    <div class="input-group">
+        <div>
+            <label>Enter Number (Integer or Float):</label>
+            <input type="text" id="inputNumber" placeholder="e.g., 25, -45, or 12.34" oninput="processAll()">
+        </div>
+        <div>
+            <label>From Base:</label>
+            <select id="fromBase" onchange="processAll()">
+                <option value="10">Decimal (10)</option>
+                <option value="2">Binary (2)</option>
+                <option value="16">Hexadecimal (16)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="grid-results">
+        <div class="card"><span class="card-title">Decimal (Base 10)</span><div class="card-value" id="valDec">-</div><button class="copy-btn" onclick="copyText('valDec')">Copy</button></div>
+        <div class="card accent-bin"><span class="card-title">Binary (Base 2)</span><div class="card-value" id="valBin">-</div><button class="copy-btn" onclick="copyText('valBin')">Copy</button></div>
+        <div class="card accent-hex"><span class="card-title">Hexadecimal (Base 16)</span><div class="card-value" id="valHex">-</div><button class="copy-btn" onclick="copyText('valHex')">Copy</button></div>
+        <div class="card accent-oct"><span class="card-title">Octal (Base 8)</span><div class="card-value" id="valOct">-</div><button class="copy-btn" onclick="copyText('valOct')">Copy</button></div>
+        
+        <div class="card accent-twos full-width">
+            <span class="card-title">2's Complement (8-bit Signed Integer)</span>
+            <div class="card-value" id="valTwos">-</div>
+            <button class="copy-btn" onclick="copyText('valTwos')">Copy</button>
+        </div>
+
+        <div class="card full-width" style="border-left-color: #64dfdf;">
+            <span class="card-title">IEEE 754 Floating Point (32-bit Single Precision)</span>
+            <div id="ieeeOutput" style="display: none;">
+                <div class="ieee-container">
+                    <div class="ieee-bit ieee-sign" id="ieeeSign" title="Sign Bit">-</div>
+                    <div class="ieee-bit ieee-exp" id="ieeeExp" title="Exponent">-</div>
+                    <div class="ieee-bit ieee-mant" id="ieeeMant" title="Mantissa">-</div>
+                </div>
+                <div class="ieee-labels">
+                    <span><strong style="color:#ef4444">■</strong> Sign (1 bit)</span>
+                    <span><strong style="color:#f59e0b">■</strong> Exponent (8 bits)</span>
+                    <span><strong style="color:#10b981">■</strong> Mantissa (23 bits)</span>
+                </div>
+                <div style="margin-top: 12px; font-size: 14px;">Hex representation: <span id="ieeeHex" style="color:#64dfdf; font-weight:bold; font-family: monospace;">-</span></div>
+            </div>
+            <div id="ieeePlaceholder" class="card-value">-</div>
+        </div>
+    </div>
+
+    <div class="steps-box" id="stepsBox">
+        <h3>Mathematical Solutions & Step-by-Step Proof</h3>
+        <div id="stepsContent"></div>
+    </div>
+</div>
+
+<script>
+function processAll() {
+    let input = document.getElementById("inputNumber").value.trim();
+    let fromBase = parseInt(document.getElementById("fromBase").value);
+    let stepsBox = document.getElementById("stepsBox");
+    let stepsContent = document.getElementById("stepsContent");
+
+    if (input === "") {
+        resetUI();
+        return;
+    }
+
+    stepsBox.style.display = "block";
+    stepsContent.innerHTML = "";
+
+    // If input is Floating Point Float Number
+    if (input.includes(".") && fromBase === 10) {
+        let floatNum = parseFloat(input);
+        if (isNaN(floatNum)) { setAllOutputs("Invalid"); stepsBox.style.display="none"; return; }
+        
+        setAllOutputs("N/A (Float input)");
+        document.getElementById("valDec").innerText = floatNum;
+        handleIEEEFloat(floatNum, stepsContent);
+        return;
+    }
+
+    // Handle Integer
+    let decimalNum = parseInt(input, fromBase);
+    if (isNaN(decimalNum)) {
+        setAllOutputs("Invalid Input");
+        stepsBox.style.display = "none";
+        return;
+    }
+
+    // Standard Grid Displays
+    document.getElementById("valDec").innerText = decimalNum;
+    document.getElementById("valBin").innerText = decimalNum.toString(2).toUpperCase();
+    document.getElementById("valHex").innerText = decimalNum.toString(16).toUpperCase();
+    document.getElementById("valOct").innerText = decimalNum.toString(8);
+
+    // Step Component 1: Base Conversion Math
+    if (fromBase === 10) {
+        stepsContent.innerHTML += generateToBaseSteps(decimalNum, 2, "Binary");
+    } else {
+        stepsContent.innerHTML += generateToDecimalSteps(input, fromBase);
+    }
+
+    // Step Component 2: Two's Complement System
+    handleTwosComplement(decimalNum, stepsContent);
+
+    // Step Component 3: IEEE Floating point system math
+    handleIEEEFloat(parseFloat(decimalNum), stepsContent);
+}
+
+function generateToBaseSteps(num, targetBase, baseName) {
+    let temp = Math.abs(num); 
+    let remainders = [];
+    let html = `<div class="step-section">
+                    <div class="step-title">1. Decimal to Base-${targetBase} (Successive Division):</div>
+                    <table class="step-table">
+                        <tr><th>Operation</th><th>Quotient</th><th>Remainder</th></tr>`;
+    
+    if(temp === 0) { html += `<tr><td>0 ÷ ${targetBase}</td><td>0</td><td>0</td></tr></table></div>`; return html; }
+
+    while (temp > 0) {
+        let rem = temp % targetBase;
+        let q = Math.floor(temp / targetBase);
+        html += `<tr><td>${temp} ÷ ${targetBase}</td><td>${q}</td><td class="highlight-text">${rem}</td></tr>`;
+        remainders.push(rem);
+        temp = q;
+    }
+    html += `</table>Read remainders from bottom to top: <span class="highlight-text">${remainders.reverse().join("")}</span></div>`;
+    return html;
+}
+
+function generateToDecimalSteps(inputStr, originalBase) {
+    let html = `<div class="step-section">
+                    <div class="step-title">1. Base-${originalBase} to Decimal (Positional Expansion Notation):</div>
+                    <div class="step-body">`;
+    let len = inputStr.length; let sumExpression = []; let totalValue = 0;
+
+    for (let i = 0; i < len; i++) {
+        let char = inputStr.charAt(i).toUpperCase();
+        let digitValue = parseInt(char, originalBase);
+        let power = len - 1 - i;
+        sumExpression.push(`(${char} × ${originalBase}<sup>${power}</sup>)`);
+        totalValue += (digitValue * Math.pow(originalBase, power));
+    }
+    html += `Expansion Formula:<br>${sumExpression.join(" + ")}<br><br>Summation Result = <span class="highlight-text">${totalValue}</span></div></div>`;
+    return html;
+}
+
+function handleTwosComplement(num, container) {
+    let html = `<div class="step-section"><div class="step-title">2. 8-Bit Two's Complement Process Matrix:</div><div class="step-body">`;
+    
+    if (num < -128 || num > 127) {
+        document.getElementById("valTwos").innerText = "Out of 8-bit range";
+        html += `Integer ${num} lies outside signed 8-bit range boundary limits (-128 to 127).</div></div>`;
+        container.innerHTML += html;
+        return;
+    }
+
+    let absoluteBin = Math.abs(num).toString(2).padStart(8, '0');
+    
+    if (num >= 0) {
+        document.getElementById("valTwos").innerText = absoluteBin;
+        html += `Value is Positive. Signed positive integer form remains identical to direct binary string:<br>Result bit string = <span class="highlight-text">${absoluteBin}</span>`;
+    } else {
+        let invertedBin = absoluteBin.split('').map(b => b === '0' ? '1' : '0').join('');
+        let finalTwos = (256 + num).toString(2).padStart(8, '0');
+        document.getElementById("valTwos").innerText = finalTwos;
+
+        html += `a) Positive Binary value of |${num}| : ${absoluteBin}<br>`;
+        html += `b) Invert Bits (1's Complement)  : ${invertedBin}<br>`;
+        html += `c) Add 1 Binary Matrix expression : ${invertedBin} + 1 = <span class="highlight-text">${finalTwos}</span>`;
+    }
+    html += `</div></div>`;
+    container.innerHTML += html;
+}
+
+function handleIEEEFloat(num, container) {
+    document.getElementById("ieeePlaceholder").style.display = "none";
+    document.getElementById("ieeeOutput").style.display = "block";
+
+    let buffer = new ArrayBuffer(4);
+    let view = new DataView(buffer);
+    view.setFloat32(0, num, false);
+    
+    let binaryStr = "";
+    for (let i = 0; i < 4; i++) { binaryStr += view.getUint8(i).toString(2).padStart(8, '0'); }
+
+    let sign = binaryStr.charAt(0);
+    let exponent = binaryStr.substring(1, 9);
+    let mantissa = binaryStr.substring(9);
+    let hex = view.getUint32(0).toString(16).toUpperCase().padStart(8, '0');
+
+    document.getElementById("ieeeSign").innerText = sign;
+    document.getElementById("ieeeExp").innerText = exponent;
+    document.getElementById("ieeeMant").innerText = mantissa;
+    document.getElementById("ieeeHex").innerText = "0x" + hex;
+
+    let expDecimal = parseInt(exponent, 2);
+    let realExp = expDecimal - 127;
+
+    let html = `<div class="step-section">
+                    <div class="step-title">3. IEEE-754 Single Precision 32-bit Float Shifting Breakdown:</div>
+                    <div class="step-body">`;
+    html += `• Sign Bit Mapping : ${num >= 0 ? "Value ≥ 0 → 0 (Positive)" : "Value < 0 → 1 (Negative)"} (Bit: <span style="color:#ef4444; font-weight:bold;">${sign}</span>)<br>`;
+    html += `• Biased Exponent  : Movable normalized scientific exponent scale shifts by ${realExp} places. Add 127 bias configuration: ${realExp} + 127 = ${expDecimal} (Unsigned Binary: <span style="color:#f59e0b; font-weight:bold;">${exponent}</span>)<br>`;
+    html += `• Mantissa Segment : Fraction remainder normalized scale configuration space (23-bits stream fraction string: <span style="color:#10b981; font-weight:bold;">${mantissa}</span>)</div></div>`;
+    
+    container.innerHTML += html;
+}
+
+function copyText(elementId) {
+    let text = document.getElementById(elementId).innerText;
+    if(text !== "-" && !text.includes("Invalid") && !text.includes("N/A")) {
+        navigator.clipboard.writeText(text);
+        alert("Copied successfully: " + text);
+    }
+}
+
+function resetUI() {
+    document.getElementById("valDec").innerText = "-"; document.getElementById("valBin").innerText = "-";
+    document.getElementById("valHex").innerText = "-"; document.getElementById("valOct").innerText = "-";
+    document.getElementById("valTwos").innerText = "-";
+    document.getElementById("ieeePlaceholder").style.display = "block";
+    document.getElementById("ieeeOutput").style.display = "none";
+    document.getElementById("stepsBox").style.display = "none";
+}
+
+function setAllOutputs(msg) {
+    document.getElementById("valDec").innerText = msg; document.getElementById("valBin").innerText = msg;
+    document.getElementById("valHex").innerText = msg; document.getElementById("valOct").innerText = msg;
+    document.getElementById("valTwos").innerText = msg;
+}
+</script>
+
+</body>
+</html>
